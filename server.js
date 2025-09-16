@@ -36,6 +36,20 @@ app.post('/api/reservar', async (req, res) => {
         res.status(500).json({ status: 'error', message: 'Error al reservar el turno.' });
     }
 });
+// Endpoint para cancelar un turno
+app.post('/api/cancelar', async (req, res) => {
+    try {
+        const { eventId } = req.body;
+        const response = await axios.post(APPS_SCRIPT_URL, {
+            action: 'cancelAppointment',
+            eventId: eventId
+        });
+        res.json(response.data);
+    } catch (error) {
+        console.error('Error cancelling appointment:', error);
+        res.status(500).json({ status: 'error', message: 'Error al cancelar el turno.' });
+    }
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

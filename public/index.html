@@ -7,14 +7,29 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Roboto', sans-serif; margin: 0; padding: 20px; background-color: #f0f8ff; color: #333; display: flex; justify-content: center; }
-        .container { background-color: #ffffff; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); padding: 30px; max-width: 800px; width: 100%; text-align: center; }
-        header img { max-width: 200px; margin-bottom: 15px; }
-        h1 { color: #005A9C; }
-        h2 { color: #009A44; border-bottom: 2px solid #009A44; padding-bottom: 10px; margin-top: 30px; }
+        .container { background-color: #ffffff; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); padding: 30px; max-width: 800px; width: 100%; text-align: center; box-sizing: border-box; }
+        p { font-size: 1.1em; margin-bottom: 15px; }
         .highlight { color: #005A9C; font-weight: 700; }
         
-        #turnos-container .dia-grupo { margin-bottom: 25px; }
-        #turnos-container .dia-titulo { font-size: 1.2em; font-weight: 700; color: #333; margin-bottom: 10px; text-align: left; text-transform: capitalize; }
+        .header-banner { background-color: #005A9C; color: white; padding: 15px 30px; border-radius: 10px 10px 0 0; display: flex; justify-content: space-between; align-items: center; margin: -30px -30px 30px -30px; }
+        .header-banner h1 { font-family: 'Roboto', sans-serif; font-size: 2em; color: white; margin: 0; border: none; }
+        .header-banner img { height: 50px; max-width: 150px; }
+
+        main h2 { color: #009A44; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-top: 30px; }
+        
+        .calendario { margin-bottom: 20px; }
+        .calendario h3 { text-transform: capitalize; color: #005A9C; }
+        .calendario table { width: 100%; border-collapse: collapse; }
+        .calendario th { padding: 10px; font-size: 0.9em; color: #666; }
+        .calendario td { padding: 5px; text-align: center; }
+        .dia-disponible, .dia-no-disponible { display: inline-block; width: 40px; height: 40px; line-height: 40px; border-radius: 50%; }
+        .dia-disponible { background-color: #005A9C; color: white; border: none; cursor: pointer; transition: transform 0.2s; }
+        .dia-disponible:hover { transform: scale(1.1); }
+        .dia-disponible.seleccionado { background-color: #009A44; outline: 2px solid #00447e; }
+        .dia-no-disponible { color: #ccc; }
+        .hoy { font-weight: bold; border: 2px solid #009A44; }
+
+        #titulo-horarios { text-transform: capitalize; color: #333; font-size: 1.1em; margin-bottom: 15px; font-weight: bold; }
         .slots-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
         .slot-button { background-color: #005A9C; color: white; border: none; padding: 15px 10px; border-radius: 5px; cursor: pointer; transition: background-color 0.3s; font-weight: 700; }
         .slot-button:hover { background-color: #00447e; }
@@ -28,31 +43,7 @@
         .success { background-color: #d4edda; color: #155724; }
         .error { background-color: #f8d7da; color: #721c24; }
         #loading { font-size: 1.2em; color: #005A9C; }
-
-        /* Estilos para el nuevo encabezado */
-.header-banner {
-    background-color: #005A9C; /* Azul corporativo de IAPOS */
-    color: white;
-    padding: 15px 30px;
-    border-radius: 10px 10px 0 0; /* Bordes redondeados solo arriba */
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin: -30px -30px 30px -30px; /* Se expande para tocar los bordes del contenedor padre */
-}
-.header-banner h1 {
-    font-family: 'Roboto', sans-serif; /* O la fuente que prefieras */
-    font-size: 2em;
-    color: white;
-    margin: 0;
-    border: none; /* Quitamos el borde que tenía h1 antes */
-}
-.header-banner img {
-    height: 50px; /* Ajustamos la altura del logo */
-    max-width: 150px;
-}
-#titulo-horarios { text-transform: capitalize; color: #333; font-size: 1.1em; margin-bottom: 15px; }
-
+        .button-link { display: inline-block; margin-top: 15px; padding: 10px 20px; background-color: #005A9C; color: white; text-decoration: none; font-weight: bold; border-radius: 5px; }
     </style>
 </head>
 <body>
@@ -70,20 +61,17 @@
             <p>Los días marcados en <span class="highlight">azul</span> tienen turnos disponibles.</p>
             
             <div id="loading">Cargando turnos disponibles...</div>
-            
             <div id="calendarios-container"></div>
             
-            <hr style="margin: 30px 0;">
-
             <div id="horarios-container" class="hidden">
+                <hr style="margin: 30px 0;">
                 <h2>2. Selecciona un horario</h2>
-    
-                <h3 id="titulo-horarios"></h3> 
-    
+                <h3 id="titulo-horarios"></h3>
                 <div id="slots-disponibles" class="slots-grid"></div>
             </div>
 
             <div id="formulario-reserva" class="hidden">
+                <hr style="margin: 30px 0;">
                 <h2>3. Completa tus datos para confirmar</h2>
                 <p id="turno-seleccionado-info" style="font-weight:bold; margin-bottom:15px;"></p>
                 <form id="booking-form">
@@ -91,7 +79,8 @@
                     <input type="text" id="nombre" name="nombre" placeholder="Nombre" required>
                     <input type="text" id="apellido" name="apellido" placeholder="Apellido" required>
                     <input type="text" id="dni" name="dni" placeholder="DNI (sin puntos)" required pattern="\d{7,8}">
-                    <input type="tel" id="whatsapp" name="whatsapp" placeholder="Teléfono de contacto" required>
+                    <input type="email" id="email" name="email" placeholder="Email para recibir la confirmación" required>
+                    <input type="tel" id="whatsapp" name="whatsapp" placeholder="Teléfono (ej: 3421234567)" required pattern="[0-9]{10}" title="Debe contener 10 dígitos, sin 0, sin 15 y sin espacios. Ejemplo: 3421234567">
                     <button type="submit">Confirmar Turno</button>
                 </form>
             </div>
@@ -102,7 +91,6 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Referencias a los elementos del DOM
             const loadingDiv = document.getElementById('loading');
             const calendariosContainer = document.getElementById('calendarios-container');
             const horariosContainer = document.getElementById('horarios-container');
@@ -110,9 +98,28 @@
             const formContainer = document.getElementById('formulario-reserva');
             const bookingForm = document.getElementById('booking-form');
             const mensajeDiv = document.getElementById('mensaje');
-            let turnosDisponibles = []; // Almacenaremos todos los turnos aquí
+            let turnosDisponibles = [];
 
-            // Función principal para iniciar la aplicación
+            // --- ESTA FUNCIÓN AHORA ESTÁ AQUÍ, VISIBLE PARA EL EVENT LISTENER ---
+            function mostrarHorariosPara(fecha) {
+                const turnosDelDia = turnosDisponibles.filter(slot => new Date(slot.time).toISOString().startsWith(fecha));
+                let html = '';
+                
+                const fechaObj = new Date(fecha + 'T00:00:00');
+                document.getElementById('titulo-horarios').textContent = fechaObj.toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+                turnosDelDia.forEach(slot => {
+                    const horaObj = new Date(slot.time);
+                    const hora = horaObj.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false });
+                    const infoCompleta = `${fechaObj.toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })} a las ${hora} hs`;
+                    html += `<button class="slot-button" data-id="${slot.id}" data-info="${infoCompleta}">${hora}</button>`;
+                });
+                
+                slotsDisponiblesDiv.innerHTML = html;
+                horariosContainer.classList.remove('hidden');
+                formContainer.classList.add('hidden');
+            }
+
             async function iniciarTurnera() {
                 try {
                     const response = await fetch('/api/turnos');
@@ -122,7 +129,41 @@
                     if (data.status === 'success' && data.slots.length > 0) {
                         turnosDisponibles = data.slots;
                         const diasConTurnos = new Set(turnosDisponibles.map(slot => new Date(slot.time).toISOString().split('T')[0]));
-                        generarCalendarios(diasConTurnos);
+                        
+                        calendariosContainer.innerHTML = '';
+                        const hoy = new Date();
+                        for (let i = 0; i < 2; i++) {
+                            const fecha = new Date(hoy.getFullYear(), hoy.getMonth() + i, 1);
+                            const mes = fecha.getMonth();
+                            const anio = fecha.getFullYear();
+                            
+                            let calendarioHTML = `<div class="calendario"><h3>${fecha.toLocaleString('es-AR', { month: 'long', year: 'numeric' })}</h3><table><thead><tr><th>Dom</th><th>Lun</th><th>Mar</th><th>Mié</th><th>Jue</th><th>Vie</th><th>Sáb</th></tr></thead><tbody>`;
+                            let primerDia = new Date(anio, mes, 1).getDay();
+                            let diasEnMes = new Date(anio, mes + 1, 0).getDate();
+                            let fechaCelda = 1;
+                            
+                            for (let j = 0; j < 6; j++) {
+                                calendarioHTML += '<tr>';
+                                for (let k = 0; k < 7; k++) {
+                                    if (j === 0 && k < primerDia || fechaCelda > diasEnMes) {
+                                        calendarioHTML += '<td></td>';
+                                    } else {
+                                        const fechaCompleta = `${anio}-${String(mes + 1).padStart(2, '0')}-${String(fechaCelda).padStart(2, '0')}`;
+                                        const esHoy = new Date().toISOString().split('T')[0] === fechaCompleta;
+                                        if (diasConTurnos.has(fechaCompleta)) {
+                                            calendarioHTML += `<td><button class="dia-disponible ${esHoy ? 'hoy' : ''}" data-fecha="${fechaCompleta}">${fechaCelda}</button></td>`;
+                                        } else {
+                                            calendarioHTML += `<td><span class="dia-no-disponible ${esHoy ? 'hoy' : ''}">${fechaCelda}</span></td>`;
+                                        }
+                                        fechaCelda++;
+                                    }
+                                }
+                                calendarioHTML += '</tr>';
+                                if(fechaCelda > diasEnMes) break;
+                            }
+                            calendarioHTML += '</tbody></table></div>';
+                            calendariosContainer.innerHTML += calendarioHTML;
+                        }
                     } else {
                         calendariosContainer.innerHTML = '<p>No hay turnos disponibles en este momento.</p>';
                     }
@@ -131,84 +172,15 @@
                 }
             }
 
-            // Función para generar los calendarios de los próximos 2 meses
-            function generarCalendarios(diasConTurnos) {
-                calendariosContainer.innerHTML = '';
-                const hoy = new Date();
-                
-                for (let i = 0; i < 2; i++) { // Generar para el mes actual y el siguiente
-                    const fecha = new Date(hoy.getFullYear(), hoy.getMonth() + i, 1);
-                    const mes = fecha.getMonth();
-                    const anio = fecha.getFullYear();
-                    
-                    let calendarioHTML = `<div class="calendario">`;
-                    calendarioHTML += `<h3>${fecha.toLocaleString('es-AR', { month: 'long', year: 'numeric' })}</h3>`;
-                    calendarioHTML += `<table><thead><tr><th>Dom</th><th>Lun</th><th>Mar</th><th>Mié</th><th>Jue</th><th>Vie</th><th>Sáb</th></tr></thead><tbody>`;
-
-                    let primerDia = new Date(anio, mes, 1).getDay();
-                    let diasEnMes = new Date(anio, mes + 1, 0).getDate();
-                    let fechaCelda = 1;
-                    
-                    for (let j = 0; j < 6; j++) {
-                        calendarioHTML += '<tr>';
-                        for (let k = 0; k < 7; k++) {
-                            if (j === 0 && k < primerDia) {
-                                calendarioHTML += '<td></td>';
-                            } else if (fechaCelda > diasEnMes) {
-                                calendarioHTML += '<td></td>';
-                            } else {
-                                const fechaCompleta = `${anio}-${String(mes + 1).padStart(2, '0')}-${String(fechaCelda).padStart(2, '0')}`;
-                                const esHoy = new Date().toISOString().split('T')[0] === fechaCompleta;
-                                
-                                if (diasConTurnos.has(fechaCompleta)) {
-                                    calendarioHTML += `<td><button class="dia-disponible ${esHoy ? 'hoy' : ''}" data-fecha="${fechaCompleta}">${fechaCelda}</button></td>`;
-                                } else {
-                                    calendarioHTML += `<td><span class="dia-no-disponible ${esHoy ? 'hoy' : ''}">${fechaCelda}</span></td>`;
-                                }
-                                fechaCelda++;
-                            }
-                        }
-                        calendarioHTML += '</tr>';
-                        if(fechaCelda > diasEnMes) break;
-                    }
-                    
-                    calendarioHTML += '</tbody></table></div>';
-                    calendariosContainer.innerHTML += calendarioHTML;
-                }
-            }
-
-            // Manejar clic en un día del calendario
             calendariosContainer.addEventListener('click', (e) => {
                 if(e.target.classList.contains('dia-disponible')) {
                     const fechaSeleccionada = e.target.dataset.fecha;
                     mostrarHorariosPara(fechaSeleccionada);
-                    
-                    // Resaltar día seleccionado
                     document.querySelectorAll('.dia-disponible').forEach(btn => btn.classList.remove('seleccionado'));
                     e.target.classList.add('seleccionado');
                 }
             });
 
-            // Función para mostrar los horarios del día seleccionado
-            function mostrarHorariosPara(fecha) {
-                const turnosDelDia = turnosDisponibles.filter(slot => new Date(slot.time).toISOString().startsWith(fecha));
-                let html = '';
-                          // Creamos una fecha (corrigiendo el desfase de zona horaria) y la formateamos
-                    const fechaObj = new Date(fecha + 'T00:00:00'); 
-                    document.getElementById('titulo-horarios').textContent = fechaObj.toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-
-                turnosDelDia.forEach(slot => {
-                    const fechaObj = new Date(slot.time);
-                    const hora = fechaObj.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false });
-                    const infoCompleta = `${fechaObj.toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })} a las ${hora} hs`;
-                    html += `<button class="slot-button" data-id="${slot.id}" data-info="${infoCompleta}">${hora}</button>`;
-                });
-                slotsDisponiblesDiv.innerHTML = html;
-                horariosContainer.classList.remove('hidden');
-                formContainer.classList.add('hidden'); // Ocultar formulario al cambiar de día
-            }
-            
-            // Manejar clic en un horario
             slotsDisponiblesDiv.addEventListener('click', (e) => {
                 if (e.target.classList.contains('slot-button')) {
                     document.getElementById('slotId').value = e.target.dataset.id;
@@ -218,7 +190,6 @@
                 }
             });
 
-            // Lógica del formulario (la misma que antes)
             bookingForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const formData = new FormData(bookingForm);
@@ -234,37 +205,36 @@
                         body: JSON.stringify(data)
                     });
                     const result = await response.json();
-                    formContainer.classList.add('hidden');
+
+                    calendariosContainer.classList.add('hidden');
                     horariosContainer.classList.add('hidden');
+                    formContainer.classList.add('hidden');
                     mensajeDiv.classList.remove('hidden');
+                    
                     if (result.status === 'success') {
                         mensajeDiv.className = 'success';
-                        mensajeDiv.innerHTML = `<h2>¡Turno confirmado con éxito!</h2><p>Tus datos han sido guardados. ¡Te esperamos!</p>`;
+                        mensajeDiv.innerHTML = `
+                            <h2>¡Turno confirmado con éxito!</h2>
+                            <p>Hemos guardado tu turno y te enviaremos una confirmación por email.</p>
+                            <br>
+                            <p>Como siguiente paso, te invitamos a completar tu <strong>Hoja de Vida Preventiva</strong>.</p>
+                            <a href="https://hoja-de-vida-iapos.onrender.com" target="_blank" class="button-link">
+                                Completar Hoja de Vida
+                            </a>
+                        `;
                     } else {
                         throw new Error(result.message);
                     }
                 } catch (error) {
                     mensajeDiv.className = 'error';
                     mensajeDiv.innerHTML = `<h2>Error al reservar</h2><p>${error.message || 'Error de conexión.'}</p><p>Por favor, recarga la página e intenta de nuevo.</p>`;
+                    submitButton.disabled = false;
+                    submitButton.textContent = 'Confirmar Turno';
                 }
             });
 
-            iniciarTurnera(); // Iniciar la aplicación
+            iniciarTurnera();
         });
     </script>
-
-    <style>
-        .calendario { margin-bottom: 20px; }
-        .calendario h3 { text-transform: capitalize; color: #005A9C; }
-        .calendario table { width: 100%; border-collapse: collapse; }
-        .calendario th { padding: 10px; font-size: 0.9em; color: #666; }
-        .calendario td { padding: 5px; text-align: center; }
-        .dia-disponible, .dia-no-disponible { display: inline-block; width: 40px; height: 40px; line-height: 40px; border-radius: 50%; }
-        .dia-disponible { background-color: #005A9C; color: white; border: none; cursor: pointer; transition: transform 0.2s; }
-        .dia-disponible:hover { transform: scale(1.1); }
-        .dia-disponible.seleccionado { background-color: #009A44; outline: 2px solid #00447e; }
-        .dia-no-disponible { color: #ccc; }
-        .hoy { font-weight: bold; border: 2px solid #009A44; }
-    </style>
 </body>
 </html>
