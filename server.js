@@ -3,15 +3,15 @@ const axios = require('axios');
 require('dotenv').config();
 
 const app = express();
-app.use(express.json()); // Para entender los datos del formulario
-app.use(express.static('public')); // Para servir nuestro index.html
+app.use(express.json());
+app.use(express.static('public'));
 
 const APPS_SCRIPT_URL = process.env.APPS_SCRIPT_URL;
 
 // Endpoint para que el frontend pida los turnos
 app.get('/api/turnos', async (req, res) => {
     try {
-        const response = await axios.post(APPS_SCRIPT_URL, { action: 'getNextAvailable', count: 500 }); // Pedimos hasta 500 turnos
+        const response = await axios.post(APPS_SCRIPT_URL, { action: 'getNextAvailable' });
         res.json(response.data);
     } catch (error) {
         console.error('Error fetching slots:', error);
@@ -21,9 +21,23 @@ app.get('/api/turnos', async (req, res) => {
 
 // Endpoint para que el frontend reserve un turno
 app.post('/api/reservar', async (req, res) => {
+    
+    // --- INICIO DEL CÓDIGO DE DIAGNÓSTICO ---
+    console.log("=============================================");
+    console.log("NUEVA RESERVA RECIBIDA EN EL SERVIDOR");
+    console.log("Datos recibidos del formulario (req.body):");
+    console.log(req.body); // Micrófono #1: ¿Qué llegó del navegador?
+    // --- FIN DEL CÓDIGO DE DIAGNÓSTICO ---
+
     try {
-        const { slotId, nombre, apellido, dni, whatsapp } = req.body;
-        const userInfo = { nombre, apellido, dni, whatsapp };
+        const { slotId, nombre, apellido, dni, email, whatsapp } = req.body;
+        const userInfo = { nombre, apellido, dni, email, whatsapp };
+
+        // --- INICIO DEL CÓDIGO DE DIAGNÓSTICO ---
+        console.log("\nDatos que se enviarán a Google (userInfo):");
+        console.log(userInfo); // Micrófono #2: ¿Qué estamos a punto de enviar?
+        console.log("=============================================");
+        // --- FIN DEL CÓDIGO DE DIAGNÓSTICO ---
 
         const response = await axios.post(APPS_SCRIPT_URL, {
             action: 'bookAppointment',
@@ -34,20 +48,6 @@ app.post('/api/reservar', async (req, res) => {
     } catch (error) {
         console.error('Error booking appointment:', error);
         res.status(500).json({ status: 'error', message: 'Error al reservar el turno.' });
-    }
-});
-// Endpoint para cancelar un turno
-app.post('/api/cancelar', async (req, res) => {
-    try {
-        const { eventId } = req.body;
-        const response = await axios.post(APPS_SCRIPT_URL, {
-            action: 'cancelAppointment',
-            eventId: eventId
-        });
-        res.json(response.data);
-    } catch (error) {
-        console.error('Error cancelling appointment:', error);
-        res.status(500).json({ status: 'error', message: 'Error al cancelar el turno.' });
     }
 });
 
