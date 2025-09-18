@@ -41,7 +41,18 @@
             box-shadow: 0 6px 20px rgba(0, 154, 68, 0.4);
         }
         /* --- FIN: NUEVOS ESTILOS --- */
-
+        .admin-button { 
+            background-color: white; 
+            color: #005A9C; 
+            padding: 8px 15px; 
+            border-radius: 5px; 
+            text-decoration: none; 
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        .admin-button:hover {
+            background-color: #f0f8ff;
+        }
         /* Calendario y formulario (sin cambios) */
         .calendario { margin-bottom: 20px; }
         .calendario h3 { text-transform: capitalize; color: #005A9C; }
@@ -72,8 +83,11 @@
         <header>
             <div class="header-banner">
                 <h1>Día Preventivo</h1>
-                <img src="logo_iapos.png" alt="Logo IAPOS">
-            </div>
+                <div>
+                    <a href="login.html" class="admin-button">Preventivistas</a>
+                    <img src="logo_iapos.png" alt="Logo IAPOS" style="height: 50px; margin-left: 15px;">
+                </div>
+</div>
         </header>
 
         <main>
@@ -263,11 +277,14 @@
                             <p>Hemos guardado tu turno y te enviaremos una confirmación por email con los siguientes detalles importantes.</p>
                 
                             <div class="instructions" style="margin-top: 20px; text-align: left;">
-                                <h3 style="color: #DD6B20; margin-top:0;">Instrucciones Importantes para tu Turno:</h3>
+                                <h3 style="color: #DD6B20; margin-top:0;">INSTRUCCIONES IMPORTANTES PARA TU TURNO:</h3>
                                 <ul>
                                     <li>Es muy importante que venga en <strong>AYUNO de al menos 12hs</strong>.</li>
                                     <li>Si es <strong>FUMADOR/A</strong>, NO debe fumar al menos una hora previa al turno.</li>
                                     <li>Si utiliza <strong>lentes</strong>, ya sea de armazón o de contacto, debe <strong>TRAERLOS</strong> ese día.</li>
+                                    <br>
+                                    <li><strong>Dirección:</strong> San Martín 3145, Santa Fe, Capital</li>
+                                    <li><strong>WhatsApp de Contacto:</strong> 342 4068756</li>
                                 </ul>
                             </div>
 

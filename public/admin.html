@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel de Turnos - IAPOS</title>
+    <style>
+    /* Estilos consistentes con el resto de la app */
+    body { font-family: 'Roboto', sans-serif; margin: 0; padding: 20px; background-color: #f0f8ff; }
+    .container { background-color: #ffffff; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); padding: 30px; max-width: 1200px; margin: auto; }
+    
+    /* --- INICIO DE LOS ESTILOS CORREGIDOS --- */
+    .header-banner {
+        background-color: #005A9C;
+        color: white;
+        padding: 15px 30px;
+        border-radius: 10px 10px 0 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: -30px -30px 30px -30px; /* Se expande para tocar los bordes */
+    }
+    .header-banner h1 {
+        font-size: 2em;
+        color: white;
+        margin: 0;
+        border: none;
+    }
+    .header-banner img {
+        height: 50px;
+    }
+    /* --- FIN DE LOS ESTILOS CORREGIDOS --- */
+
+    h2 { color: #005A9C; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { padding: 12px; border-bottom: 1px solid #ddd; text-align: left; }
+    th { background-color: #e6f7ff; }
+    .cancel-btn { background-color: #dc3545; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; }
+    .cancel-btn:hover { background-color: #c82333; }
+</style>
+</head>
+<body>
+    <div class="container">
+        <h2>Panel de Turnos Agendados</h2>
+        <table id="turnos-table">
+            <thead>
+                <tr>
+                    <th>Fecha y Hora</th>
+                    <th>Apellido y Nombre</th>
+                    <th>DNI</th>
+                    <th>Email</th>
+                    <th>Teléfono</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Proteger la página: si no está logueado, lo saca
+        if (sessionStorage.getItem('preventivista-logueado') !== 'true') {
+            window.location.href = 'login.html';
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const tableBody = document.querySelector('#turnos-table tbody');
+            
+            // Pedir al servidor la lista de todos los turnos confirmados
+            const response = await fetch('/api/admin/turnos');
+            const data = await response.json();
+
+            if (data.status === 'success') {
+                let html = '';
+                data.appointments.forEach(turno => {
+                    const fecha = new Date(turno.fechaInicio).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' });
+                    html += `
+                        <tr id="turno-${turno.idEvento}">
+                            <td>${fecha}</td>
+                            <td>${turno.apellido}, ${turno.nombre}</td>
+                            <td>${turno.dni}</td>
+                            <td>${turno.email}</td>
+                            <td>${turno.telefono}</td>
+                            <td><button class="cancel-btn" data-id="${turno.idEvento}">Anular</button></td>
+                        </tr>
+                    `;
+                });
+                tableBody.innerHTML = html;
+            }
+        });
+
+        // Lógica para el botón de anular
+        document.getElementById('turnos-table').addEventListener('click', async (e) => {
+            if (e.target.classList.contains('cancel-btn')) {
+                const eventId = e.target.dataset.id;
+                if (confirm('¿Estás seguro de que quieres anular este turno?')) {
+                    const response = await fetch('/api/cancelar', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ eventId: eventId })
+                    });
+                    const result = await response.json();
+                    if (result.status === 'success') {
+                        // Eliminar la fila de la tabla
+                        document.getElementById(`turno-${eventId}`).remove();
+                        alert('Turno anulado con éxito.');
+                    } else {
+                        alert('Error al anular el turno: ' + result.message);
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

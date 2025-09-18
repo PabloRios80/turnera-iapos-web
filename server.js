@@ -51,6 +51,17 @@ app.post('/api/reservar', async (req, res) => {
     }
 });
 
+// Endpoint para que el panel de administración pida todos los turnos
+app.get('/api/admin/turnos', async (req, res) => {
+    try {
+        const response = await axios.post(APPS_SCRIPT_URL, { action: 'getAllAppointments' });
+        res.json(response.data);
+    } catch (error) {
+        console.error('Error fetching all appointments:', error);
+        res.status(500).json({ status: 'error', message: 'No se pudieron cargar los turnos.' });
+    }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Servidor de la turnera corriendo en http://localhost:${PORT}`);
