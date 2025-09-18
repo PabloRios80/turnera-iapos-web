@@ -293,6 +293,20 @@
                                 Completar Hoja de Vida
                             </a>
                         `;
+
+                        const logoutSuccessBtn = document.getElementById('logout-success-btn');
+                        if (logoutSuccessBtn) {
+                            logoutSuccessBtn.addEventListener('click', () => {
+                                // Verificamos si el preventivista estaba logueado
+                                if (sessionStorage.getItem('preventivista-logueado') === 'true') {
+                                    sessionStorage.removeItem('preventivista-logueado');
+                                    window.location.href = 'index.html'; // Lo desloguea
+                                } else {
+                                    // Si es un usuario normal, simplemente lo lleva al inicio
+                                    window.location.href = 'index.html'; 
+                                }
+                            });
+                        }
                     } else {
                         throw new Error(result.message);
                     }

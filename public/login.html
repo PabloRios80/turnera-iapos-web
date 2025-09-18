@@ -5,9 +5,23 @@
     <title>Acceso Preventivistas - IAPOS</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        /* (Estilos similares a los de index.html para consistencia) */
         body { font-family: 'Roboto', sans-serif; background-color: #f0f8ff; display: flex; justify-content: center; align-items: center; height: 100vh; }
         .login-container { background-color: white; padding: 40px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; width: 100%; max-width: 400px; }
+        
+        /* --- INICIO DE LA MODIFICACIÓN --- */
+        .logo-background {
+            background-color: #005A9C; /* Azul IAPOS */
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: inline-block; /* Para que el fondo se ajuste al contenido */
+        }
+        .logo-background img {
+            max-width: 150px;
+            display: block; /* Evita espacios extra debajo de la imagen */
+        }
+        /* --- FIN DE LA MODIFICACIÓN --- */
+
         h1 { color: #005A9C; }
         input { width: calc(100% - 22px); padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; }
         button { background-color: #009A44; color: white; padding: 12px 20px; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-size: 1em; }
@@ -16,7 +30,9 @@
 </head>
 <body>
     <div class="login-container">
-        <img src="logo_iapos.png" alt="Logo IAPOS" style="max-width: 150px; margin-bottom: 20px;">
+        <div class="logo-background">
+            <img src="logo_iapos.png" alt="Logo IAPOS">
+        </div>
         <h1>Acceso Preventivistas</h1>
         <form id="login-form">
             <input type="email" id="username" placeholder="Usuario (email)" required>
@@ -27,19 +43,16 @@
     </div>
 
     <script>
+        // El JavaScript de login.html no necesita cambios.
         const loginForm = document.getElementById('login-form');
         const errorMessage = document.getElementById('error-message');
-
         loginForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
 
-            // --- IMPORTANTE: Login simple y poco seguro, solo para empezar ---
             if (username === 'diapreventivoiapos@diapreventivo.com' && password === 'dia_preventivo') {
-                // Guardar una "llave" simple para indicar que está logueado
                 sessionStorage.setItem('preventivista-logueado', 'true');
-                // Redirigir al panel de administración
                 window.location.href = 'admin.html';
             } else {
                 errorMessage.style.display = 'block';

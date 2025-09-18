@@ -8,14 +8,42 @@ app.use(express.static('public'));
 
 const APPS_SCRIPT_URL = process.env.APPS_SCRIPT_URL;
 
+
 // Endpoint para que el frontend pida los turnos
 app.get('/api/turnos', async (req, res) => {
     try {
         const response = await axios.post(APPS_SCRIPT_URL, { action: 'getNextAvailable' });
+        
+        // --- INICIO DEL CÓDIGO DE DIAGNÓSTICO ---
+        console.log("\n=======================================================");
+        console.log("INFORME DE ESTADO RECIBIDO DESDE GOOGLE APPS SCRIPT:");
+        // Imprimimos el informe de depuración que nos envía el script
+        if (response.data.debug_log) {
+            console.log(response.data.debug_log);
+        }
+        console.log("=======================================================\n");
+        // --- FIN DEL CÓDIGO DE DIAGNÓSTICO ---
+        
         res.json(response.data);
     } catch (error) {
         console.error('Error fetching slots:', error);
         res.status(500).json({ status: 'error', message: 'No se pudieron cargar los turnos.' });
+    }
+});
+
+
+// Endpoint para buscar datos de un afiliado por DNI
+app.get('/api/admin/usuario/:dni', async (req, res) => {
+    try {
+        const { dni } = req.params;
+        const response = await axios.post(APPS_SCRIPT_URL, {
+            action: 'getUserDataByDNI',
+            dni: dni
+        });
+        res.json(response.data);
+    } catch (error) {
+        console.error('Error fetching user data by DNI:', error);
+        res.status(500).json({ status: 'error', message: 'No se pudo buscar el afiliado.' });
     }
 });
 
