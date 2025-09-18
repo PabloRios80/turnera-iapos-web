@@ -6,38 +6,59 @@
     <title>Turnos Día Preventivo - IAPOS</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
+        /* Estilos generales (sin cambios) */
         body { font-family: 'Roboto', sans-serif; margin: 0; padding: 20px; background-color: #f0f8ff; color: #333; display: flex; justify-content: center; }
         .container { background-color: #ffffff; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); padding: 30px; max-width: 800px; width: 100%; text-align: center; box-sizing: border-box; }
-        p { font-size: 1.1em; margin-bottom: 15px; }
         .highlight { color: #005A9C; font-weight: 700; }
         
+        /* Encabezado (sin cambios) */
         .header-banner { background-color: #005A9C; color: white; padding: 15px 30px; border-radius: 10px 10px 0 0; display: flex; justify-content: space-between; align-items: center; margin: -30px -30px 30px -30px; }
-        .header-banner h1 { font-family: 'Roboto', sans-serif; font-size: 2em; color: white; margin: 0; border: none; }
+        .header-banner h1 { font-size: 2em; color: white; margin: 0; border: none; }
         .header-banner img { height: 50px; max-width: 150px; }
 
         main h2 { color: #009A44; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-top: 30px; }
-        
+
+        /* --- INICIO: NUEVOS ESTILOS PARA LA INTRODUCCIÓN Y EL BOTÓN --- */
+        #intro-section p {
+            font-size: 1.2em;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        .cta-button {
+            background-color: #009A44; /* Verde IAPOS */
+            color: white;
+            border: none;
+            border-radius: 50px; /* Botón tipo "píldora" */
+            padding: 15px 30px;
+            font-size: 1.2em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 154, 68, 0.3);
+        }
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 154, 68, 0.4);
+        }
+        /* --- FIN: NUEVOS ESTILOS --- */
+
+        /* Calendario y formulario (sin cambios) */
         .calendario { margin-bottom: 20px; }
         .calendario h3 { text-transform: capitalize; color: #005A9C; }
         .calendario table { width: 100%; border-collapse: collapse; }
         .calendario th { padding: 10px; font-size: 0.9em; color: #666; }
         .calendario td { padding: 5px; text-align: center; }
-        .dia-disponible, .dia-no-disponible { display: inline-block; width: 40px; height: 40px; line-height: 40px; border-radius: 50%; }
-        .dia-disponible { background-color: #005A9C; color: white; border: none; cursor: pointer; transition: transform 0.2s; }
+        .dia-disponible { background-color: #005A9C; color: white; border: none; cursor: pointer; transition: transform 0.2s; display: inline-block; width: 40px; height: 40px; line-height: 40px; border-radius: 50%; }
         .dia-disponible:hover { transform: scale(1.1); }
         .dia-disponible.seleccionado { background-color: #009A44; outline: 2px solid #00447e; }
-        .dia-no-disponible { color: #ccc; }
+        .dia-no-disponible { color: #ccc; display: inline-block; width: 40px; height: 40px; line-height: 40px; border-radius: 50%; }
         .hoy { font-weight: bold; border: 2px solid #009A44; }
-
         #titulo-horarios { text-transform: capitalize; color: #333; font-size: 1.1em; margin-bottom: 15px; font-weight: bold; }
         .slots-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
         .slot-button { background-color: #005A9C; color: white; border: none; padding: 15px 10px; border-radius: 5px; cursor: pointer; transition: background-color 0.3s; font-weight: 700; }
-        .slot-button:hover { background-color: #00447e; }
-        
         #formulario-reserva { background-color: #e6f7ff; padding: 20px; border-radius: 8px; margin-top: 20px; }
         #formulario-reserva input { width: calc(100% - 22px); padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; }
         #formulario-reserva button { background-color: #009A44; color: white; padding: 12px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 1em; }
-        
         .hidden { display: none; }
         #mensaje { padding: 15px; margin-top: 20px; border-radius: 5px; font-weight: bold; }
         .success { background-color: #d4edda; color: #155724; }
@@ -53,44 +74,53 @@
                 <h1>Día Preventivo</h1>
                 <img src="logo_iapos.png" alt="Logo IAPOS">
             </div>
-            <p>El <span class="highlight">Día Preventivo</span> es un chequeo integral de salud <span class="highlight">totalmente gratuito</span> para nuestros afiliados.</p>
         </header>
 
         <main>
-            <h2>1. Selecciona un día en el calendario</h2>
-            <p>Los días marcados en <span class="highlight">azul</span> tienen turnos disponibles.</p>
-            
-            <div id="loading">Cargando turnos disponibles...</div>
-            <div id="calendarios-container"></div>
-            
-            <div id="horarios-container" class="hidden">
-                <hr style="margin: 30px 0;">
-                <h2>2. Selecciona un horario</h2>
-                <h3 id="titulo-horarios"></h3>
-                <div id="slots-disponibles" class="slots-grid"></div>
+            <div id="intro-section">
+                <p>El <span class="highlight">Día Preventivo</span> es un programa de IAPOS que de manera personalizada y rápido te invita a realizar las principales practicas y estudios preventivos según tu edad, sexo y riesgo personal. Es <span class="highlight">totalmente gratuito</span> para nuestros afiliados.</p>
+                <p><strong>Empieza a cuidarte ahora y saca un turno aquí:</strong></p>
+                <button id="show-turnera-btn" class="cta-button">
+                    Turnos para hacerse el Día Preventivo
+                </button>
             </div>
+            <div id="turnera-wrapper" class="hidden">
+                <h2>1. Selecciona un día en el calendario</h2>
+                <p>Los días marcados en <span class="highlight">azul</span> tienen turnos disponibles.</p>
+                
+                <div id="loading">Cargando turnos disponibles...</div>
+                <div id="calendarios-container"></div>
+                
+                <div id="horarios-container" class="hidden">
+                    <hr style="margin: 30px 0;">
+                    <h2>2. Selecciona un horario</h2>
+                    <h3 id="titulo-horarios"></h3>
+                    <div id="slots-disponibles" class="slots-grid"></div>
+                </div>
 
-            <div id="formulario-reserva" class="hidden">
-                <hr style="margin: 30px 0;">
-                <h2>3. Completa tus datos para confirmar</h2>
-                <p id="turno-seleccionado-info" style="font-weight:bold; margin-bottom:15px;"></p>
-                <form id="booking-form">
-                    <input type="hidden" id="slotId" name="slotId">
-                    <input type="text" id="nombre" name="nombre" placeholder="Nombre" required>
-                    <input type="text" id="apellido" name="apellido" placeholder="Apellido" required>
-                    <input type="text" id="dni" name="dni" placeholder="DNI (sin puntos)" required pattern="\d{7,8}">
-                    <input type="email" id="email" name="email" placeholder="Email para recibir la confirmación" required>
-                    <input type="tel" id="whatsapp" name="whatsapp" placeholder="Teléfono (ej: 3421234567)" required pattern="[0-9]{10}" title="Debe contener 10 dígitos, sin 0, sin 15 y sin espacios. Ejemplo: 3421234567">
-                    <button type="submit">Confirmar Turno</button>
-                </form>
+                <div id="formulario-reserva" class="hidden">
+                    <hr style="margin: 30px 0;">
+                    <h2>3. Completa tus datos para confirmar</h2>
+                    <p id="turno-seleccionado-info" style="font-weight:bold; margin-bottom:15px;"></p>
+                    <form id="booking-form">
+                        <input type="hidden" id="slotId" name="slotId">
+                        <input type="text" id="nombre" name="nombre" placeholder="Nombre" required>
+                        <input type="text" id="apellido" name="apellido" placeholder="Apellido" required>
+                        <input type="text" id="dni" name="dni" placeholder="DNI (sin puntos)" required pattern="\d{7,8}">
+                        <input type="email" id="email" name="email" placeholder="Email para recibir la confirmación" required>
+                        <input type="tel" id="whatsapp" name="whatsapp" placeholder="Teléfono (ej: 3421234567)" required pattern="[0-9]{10}" title="Debe contener 10 dígitos, sin 0, sin 15 y sin espacios. Ejemplo: 3421234567">
+                        <button type="submit">Confirmar Turno</button>
+                    </form>
+                </div>
+
+                <div id="mensaje" class="hidden"></div>
             </div>
-
-            <div id="mensaje" class="hidden"></div>
-        </main>
+            </main>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // Referencias a los elementos del DOM (sin cambios)
             const loadingDiv = document.getElementById('loading');
             const calendariosContainer = document.getElementById('calendarios-container');
             const horariosContainer = document.getElementById('horarios-container');
@@ -99,6 +129,20 @@
             const bookingForm = document.getElementById('booking-form');
             const mensajeDiv = document.getElementById('mensaje');
             let turnosDisponibles = [];
+
+            // --- INICIO: NUEVA LÓGICA PARA EL BOTÓN DE BIENVENIDA ---
+            const introSection = document.getElementById('intro-section');
+            const showTurneraBtn = document.getElementById('show-turnera-btn');
+            const turneraWrapper = document.getElementById('turnera-wrapper');
+
+            showTurneraBtn.addEventListener('click', () => {
+                // Ocultamos la introducción
+                introSection.classList.add('hidden');
+                // Mostramos la turnera
+                turneraWrapper.classList.remove('hidden');
+                // Hacemos scroll suave hacia la turnera
+                turneraWrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
 
             // --- ESTA FUNCIÓN AHORA ESTÁ AQUÍ, VISIBLE PARA EL EVENT LISTENER ---
             function mostrarHorariosPara(fecha) {
@@ -171,16 +215,17 @@
                     loadingDiv.textContent = 'Error al cargar los turnos.';
                 }
             }
-
             calendariosContainer.addEventListener('click', (e) => {
                 if(e.target.classList.contains('dia-disponible')) {
-                    const fechaSeleccionada = e.target.dataset.fecha;
-                    mostrarHorariosPara(fechaSeleccionada);
-                    document.querySelectorAll('.dia-disponible').forEach(btn => btn.classList.remove('seleccionado'));
-                    e.target.classList.add('seleccionado');
+                const fechaSeleccionada = e.target.dataset.fecha;
+                mostrarHorariosPara(fechaSeleccionada);
+                document.querySelectorAll('.dia-disponible').forEach(btn => btn.classList.remove('seleccionado'));
+                e.target.classList.add('seleccionado');
+
+                // --- LÍNEA AÑADIDA PARA EL SCROLL AUTOMÁTICO ---
+                document.getElementById('horarios-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
             });
-
             slotsDisponiblesDiv.addEventListener('click', (e) => {
                 if (e.target.classList.contains('slot-button')) {
                     document.getElementById('slotId').value = e.target.dataset.id;
