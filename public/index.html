@@ -53,6 +53,19 @@
         .admin-button:hover {
             background-color: #f0f8ff;
         }
+
+        .action-button {
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+        }
+        .btn-gray { 
+            background-color: #6c757d; 
+        }
         /* Calendario y formulario (sin cambios) */
         .calendario { margin-bottom: 20px; }
         .calendario h3 { text-transform: capitalize; color: #005A9C; }
@@ -308,19 +321,29 @@
                             <p>Hemos guardado tu turno y te enviaremos una confirmación por email con los siguientes detalles importantes.</p>
                 
                             <div class="instructions" style="margin-top: 20px; text-align: left;">
-                                <h3 style="color: #DD6B20; margin-top:0;">Instrucciones Importantes para tu Turno:</h3>
+                                <h3 style="color: #DD6B20; margin-top:0;">INSTRUCCIONES IMPORTANTES PARA TU TURNO:</h3>
                                 <ul>
                                     <li>Es muy importante que venga en <strong>AYUNO de al menos 12hs</strong>.</li>
                                     <li>Si es <strong>FUMADOR/A</strong>, NO debe fumar al menos una hora previa al turno.</li>
                                     <li>Si utiliza <strong>lentes</strong>, ya sea de armazón o de contacto, debe <strong>TRAERLOS</strong> ese día.</li>
+                                    <br>
+                                    <li><strong>Dirección:</strong> San Martín 3145, Santa Fe, Capital</li>
+                                    <li><strong>WhatsApp de Contacto:</strong> 342 4068756</li>
                                 </ul>
                             </div>
-
                             <p style="margin-top: 20px;">Como siguiente paso, te invitamos a completar tu <strong>Hoja de Vida Preventiva</strong>.</p>
                             <a href="https://hoja-de-vida-iapos.onrender.com" target="_blank" class="button-link">
                                 Completar Hoja de Vida
                             </a>
+                            <button id="exit-btn" class="action-button btn-gray" style="margin-top: 20px; margin-left: 10px;">Salir</button>
+
                         `;
+
+                        // Ahora que el botón "exit-btn" existe en la página, le damos su funcionalidad.
+                        document.getElementById('exit-btn').addEventListener('click', () => {
+                            window.location.reload(); 
+                        });
+                        
                     } else {
                         throw new Error(result.message);
                     }
