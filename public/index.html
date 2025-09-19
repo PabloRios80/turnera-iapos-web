@@ -143,6 +143,38 @@
             const mensajeDiv = document.getElementById('mensaje');
             let turnosDisponibles = [];
 
+             // --- INICIO DE LA NUEVA SECCIÓN DE PRECARGA ---
+        const dniInput = bookingForm.querySelector('#dni');
+        const nombreInput = bookingForm.querySelector('#nombre');
+        const apellidoInput = bookingForm.querySelector('#apellido');
+        const emailInput = bookingForm.querySelector('#email');
+        const whatsappInput = bookingForm.querySelector('#whatsapp');
+
+        dniInput.addEventListener('blur', async () => { // 'blur' se activa cuando el usuario sale del campo DNI
+            const dni = dniInput.value.trim();
+            if (dni.length >= 7) {
+                try {
+                    const response = await fetch(`/api/usuario/${dni}`);
+                    const result = await response.json();
+
+                    if (result.status === 'success') {
+                        // Creamos un mensaje de confirmación
+                        const confirmacion = confirm(`Hemos encontrado datos para este DNI:\n\nNombre: ${result.data.nombre}\nApellido: ${result.data.apellido}\n\n¿Desea utilizarlos para autocompletar el formulario?`);
+                        
+                        if (confirmacion) {
+                            nombreInput.value = result.data.nombre || '';
+                            apellidoInput.value = result.data.apellido || '';
+                            emailInput.value = result.data.email || '';
+                            whatsappInput.value = result.data.telefono || '';
+                        }
+                    }
+                } catch (error) {
+                    console.error("Error buscando DNI:", error);
+                    // No hacemos nada si falla, el usuario puede seguir cargando manualmente
+                }
+            }
+        });
+
             // --- INICIO: NUEVA LÓGICA PARA EL BOTÓN DE BIENVENIDA ---
             const introSection = document.getElementById('intro-section');
             const showTurneraBtn = document.getElementById('show-turnera-btn');

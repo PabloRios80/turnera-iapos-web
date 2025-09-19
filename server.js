@@ -49,6 +49,21 @@ app.get('/api/admin/turnos', async (req, res) => {
     }
 });
 
+// Endpoint para buscar datos de un afiliado por DNI
+app.get('/api/usuario/:dni', async (req, res) => {
+    try {
+        const { dni } = req.params;
+        const response = await axios.post(APPS_SCRIPT_URL, {
+            action: 'getUserDataByDNI',
+            dni: dni
+        });
+        res.json(response.data);
+    } catch (error) {
+        console.error('Error fetching user data by DNI:', error);
+        res.status(500).json({ status: 'error', message: 'No se pudo buscar el afiliado.' });
+    }
+});
+
 // Endpoint para cancelar un turno desde el panel de administración
 app.post('/api/cancelar', async (req, res) => {
     try {
