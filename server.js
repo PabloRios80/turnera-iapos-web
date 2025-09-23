@@ -78,7 +78,46 @@ app.post('/api/cancelar', async (req, res) => {
         res.status(500).json({ status: 'error', message: 'Error al cancelar el turno.' });
     }
 });
-// --- FIN DEL CÓDIGO FALTANTE ---
+// Endpoint para el registro de nuevos profesionales
+app.post('/api/profesionales/registro', async (req, res) => {
+    try {
+        const response = await axios.post(APPS_SCRIPT_URL, {
+            action: 'registerProfessional',
+            professionalData: req.body
+        });
+        res.json(response.data);
+    } catch (error) {
+        console.error('Error registering professional:', error);
+        res.status(500).json({ status: 'error', message: 'No se pudo procesar la solicitud de registro.' });
+    }
+});
+
+// Endpoint para el login de profesionales
+app.post('/api/profesionales/login', async (req, res) => {
+    try {
+        const response = await axios.post(APPS_SCRIPT_URL, {
+            action: 'loginProfessional',
+            credentials: req.body
+        });
+        res.json(response.data);
+    } catch (error) {
+        res.status(500).json({ status: 'error', message: 'Error en el servidor.' });
+    }
+});
+
+// Endpoint para guardar una derivación
+app.post('/api/profesionales/derivar', async (req, res) => {
+    try {
+        const response = await axios.post(APPS_SCRIPT_URL, {
+            action: 'createReferral',
+            referralData: req.body
+        });
+        res.json(response.data);
+    } catch (error) {
+        res.status(500).json({ status: 'error', message: 'No se pudo guardar la derivación.' });
+    }
+});
+
 
 
 const PORT = process.env.PORT || 3000;
