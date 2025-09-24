@@ -5,14 +5,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Turnos Día Preventivo - IAPOS</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
     <style>
         /* Tus estilos CSS completos aquí */
         body { font-family: 'Roboto', sans-serif; margin: 0; padding: 20px; background-color: #f0f8ff; color: #333; display: flex; justify-content: center; }
         .container { background-color: #ffffff; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); padding: 30px; max-width: 800px; width: 100%; text-align: center; box-sizing: border-box; }
         .highlight { color: #005A9C; font-weight: 700; }
-        .header-banner { background-color: #005A9C; color: white; padding: 15px 30px; border-radius: 10px 10px 0 0; display: flex; justify-content: space-between; align-items: center; margin: -30px -30px 30px -30px; }
-        .header-banner h1 { font-size: 2em; color: white; margin: 0; border: none; }
-        .header-banner img { height: 50px; max-width: 150px; }
+        /* --- ESTILOS DEL ENCABEZADO ACTUALIZADOS --- */
+        .header-banner { 
+            background-color: #005A9C; 
+            color: white; 
+            padding: 20px 30px; /* Un poco más de espacio */
+            border-radius: 10px 10px 0 0; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin: -30px -30px 30px -30px; 
+        }
+        .header-title {
+            text-align: right; /* Alinea el texto a la derecha */
+        }
+        .header-title h1 { 
+            font-family: 'Montserrat', sans-serif; /* Nueva tipografía */
+            font-size: 1.8em; /* Tamaño ajustado */
+            font-weight: 700;
+            color: white; 
+            margin: 0; 
+            border: none; 
+        }
+        .header-banner img { 
+            height: 50px; 
+            max-width: 150px; 
+        }
+           /* --- FIN DE LA ACTUALIZACIÓN --- */
         main h2 { color: #009A44; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-top: 30px; }
         #intro-section p { font-size: 1.2em; line-height: 1.6; margin-bottom: 30px; }
         .cta-button { background-color: #009A44; color: white; border: none; border-radius: 50px; padding: 15px 30px; font-size: 1.2em; font-weight: 700; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0, 154, 68, 0.3); }
@@ -45,27 +70,41 @@
         .button-link { display: inline-block; margin-top: 15px; padding: 10px 20px; background-color: #005A9C; color: white; text-decoration: none; font-weight: bold; border-radius: 5px; }
         .instructions { border-left: 5px solid #005A9C; padding: 0.1em 1em; }
         .instructions ul { list-style-position: inside; padding-left: 0; }
+        .address-note {
+           font-size: 0.5em; /* Letra más pequeña */
+           color: #666;      /* Color un poco más suave */
+           margin-top: -10px; /* Lo acerca al párrafo de arriba */
+            margin-bottom: 30px;
+        } 
+        .whatsapp-note {
+           margin-top: 20px; /* Espacio debajo del botón */
+            font-size: 1.1em;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
             <div class="header-banner">
-                <h1>Día Preventivo</h1>
-                <div>
-                    <a href="portal-profesionales.html" class="admin-button">Profesionales</a>
-                    <a href="login.html" class="admin-button">Preventivistas</a>
-                    <img src="logo_iapos.png" alt="Logo IAPOS" style="height: 50px; margin-left: 15px;">
+                <img src="logo_iapos.png" alt="Logo IAPOS">
+        
+                <div class="header-title">
+                    <h1>Día Preventivo</h1>
                 </div>
-            </div>
+            </div>  
         </header>
         <main>
             <div id="intro-section">
                 <p>El <span class="highlight">Día Preventivo</span> es un programa de IAPOS que de manera personalizada y rápido te invita a realizar las principales practicas y estudios preventivos según tu edad, sexo y riesgo personal. Es <span class="highlight">totalmente gratuito</span> para nuestros afiliados.</p>
+    
+                <p class="address-note">(El turno lo va a sacar para nuestro Centro de Prevención y Promoción de la Salud de calle San Martin 3145 Santa Fe. Capital)</p>
+    
                 <p><strong>Empieza a cuidarte ahora y saca un turno aquí:</strong></p>
                 <button id="show-turnera-btn" class="cta-button">
                     Turnos para hacerse el Día Preventivo
                 </button>
+    
+                <p class="whatsapp-note">o comunicate a nuestro WhatsApp <strong>342 4071702</strong></p>
             </div>
             <div id="turnera-wrapper" class="hidden">
                 <h2 id="titulo-seleccion-dia">1. Selecciona un día en el calendario</h2>
