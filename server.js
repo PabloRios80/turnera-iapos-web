@@ -11,7 +11,16 @@ const APPS_SCRIPT_URL = process.env.APPS_SCRIPT_URL;
 // Endpoint para que el frontend pida los turnos disponibles
 app.get('/api/turnos', async (req, res) => {
     try {
-        const response = await axios.post(APPS_SCRIPT_URL, { action: 'getNextAvailable' });
+        // Leemos la ciudad que viene en la URL (ej: /api/turnos?city=rosario)
+        // Si no viene nada, asumimos 'santafe' por defecto
+        const city = req.query.city || 'santafe';
+
+        console.log(`Solicitando turnos para: ${city}`); // Log para depurar
+
+        const response = await axios.post(APPS_SCRIPT_URL, { 
+            action: 'getNextAvailable',
+            city: city // Enviamos la ciudad al Apps Script
+        });
         res.json(response.data);
     } catch (error) {
         console.error('Error fetching available slots:', error);
@@ -22,13 +31,21 @@ app.get('/api/turnos', async (req, res) => {
 // Endpoint para que el frontend reserve un turno
 app.post('/api/reservar', async (req, res) => {
     try {
-        const { slotId, nombre, apellido, dni, email, whatsapp } = req.body;
+        // Ahora recibimos también la 'city' desde el cuerpo del formulario
+        const { slotId, nombre, apellido, dni, email, whatsapp, city } = req.body;
+        
+        // Validamos que llegue la ciudad, si no, default a santafe
+        const ciudadDestino = city || 'santafe';
+
         const userInfo = { nombre, apellido, dni, email, whatsapp };
+
+        console.log(`Reservando turno en ${ciudadDestino} para DNI ${dni}`); // Log para depurar
 
         const response = await axios.post(APPS_SCRIPT_URL, {
             action: 'bookAppointment',
             slotId: slotId,
-            userInfo: userInfo
+            userInfo: userInfo,
+            city: ciudadDestino // Enviamos la ciudad al Apps Script
         });
         res.json(response.data);
     } catch (error) {
@@ -37,8 +54,9 @@ app.post('/api/reservar', async (req, res) => {
     }
 });
 
-// --- INICIO DEL CÓDIGO FALTANTE ---
-// Endpoint para que el panel de administración pida TODOS los turnos agendados
+// --- EL RESTO DE ENDPOINTS SIGUEN IGUAL (Admin, Login, etc) ---
+// No necesitan cambios de ciudad por ahora a menos que quieras admin separado
+
 app.get('/api/admin/turnos', async (req, res) => {
     try {
         const response = await axios.post(APPS_SCRIPT_URL, { action: 'getAllAppointments' });
@@ -49,7 +67,6 @@ app.get('/api/admin/turnos', async (req, res) => {
     }
 });
 
-// Endpoint para buscar datos de un afiliado por DNI
 app.get('/api/usuario/:dni', async (req, res) => {
     try {
         const { dni } = req.params;
@@ -64,7 +81,6 @@ app.get('/api/usuario/:dni', async (req, res) => {
     }
 });
 
-// Endpoint para cancelar un turno desde el panel de administración
 app.post('/api/cancelar', async (req, res) => {
     try {
         const { eventId } = req.body;
@@ -78,7 +94,7 @@ app.post('/api/cancelar', async (req, res) => {
         res.status(500).json({ status: 'error', message: 'Error al cancelar el turno.' });
     }
 });
-// Endpoint para el registro de nuevos profesionales
+
 app.post('/api/profesionales/registro', async (req, res) => {
     try {
         const response = await axios.post(APPS_SCRIPT_URL, {
@@ -92,7 +108,6 @@ app.post('/api/profesionales/registro', async (req, res) => {
     }
 });
 
-// Endpoint para el login de profesionales
 app.post('/api/profesionales/login', async (req, res) => {
     try {
         const response = await axios.post(APPS_SCRIPT_URL, {
@@ -105,7 +120,6 @@ app.post('/api/profesionales/login', async (req, res) => {
     }
 });
 
-// Endpoint para guardar una derivación
 app.post('/api/profesionales/derivar', async (req, res) => {
     try {
         const response = await axios.post(APPS_SCRIPT_URL, {
@@ -117,8 +131,6 @@ app.post('/api/profesionales/derivar', async (req, res) => {
         res.status(500).json({ status: 'error', message: 'No se pudo guardar la derivación.' });
     }
 });
-
-
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
