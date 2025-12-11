@@ -18,7 +18,7 @@ app.get('/api/turnos', async (req, res) => {
         console.log(`Solicitando turnos para: ${city}`); // Log para depurar
 
         const response = await axios.post(APPS_SCRIPT_URL, { 
-            action: 'getNextAvailable',
+            action: 'getNextAvailable',         
             city: city // Enviamos la ciudad al Apps Script
         });
         res.json(response.data);
