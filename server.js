@@ -8,26 +8,23 @@ app.use(express.static('public'));
 
 const APPS_SCRIPT_URL = process.env.APPS_SCRIPT_URL;
 
-// Endpoint para que el frontend pida los turnos disponibles
+// Obtener turnos disponibles
+// Obtener turnos disponibles
 app.get('/api/turnos', async (req, res) => {
     try {
-        // Leemos la ciudad que viene en la URL (ej: /api/turnos?city=rosario)
-        // Si no viene nada, asumimos 'santafe' por defecto
-        const city = req.query.city || 'santafe';
-
-        console.log(`Solicitando turnos para: ${city}`); // Log para depurar
-
+        const city = req.query.city || 'santafe'; 
+        const subcity = req.query.subcity || ''; // <-- ESTO ES CLAVE
+        
         const response = await axios.post(APPS_SCRIPT_URL, { 
-            action: 'getNextAvailable',         
-            city: city // Enviamos la ciudad al Apps Script
+            action: 'getNextAvailableSlots',
+            city: city,
+            subcity: subcity // <-- SE LO PASAMOS AL APPS SCRIPT
         });
         res.json(response.data);
     } catch (error) {
-        console.error('Error fetching available slots:', error);
-        res.status(500).json({ status: 'error', message: 'No se pudieron cargar los turnos.' });
+        res.status(500).json({ status: 'error', message: 'Error' });
     }
 });
-
 // Endpoint para que el frontend reserve un turno
 app.post('/api/reservar', async (req, res) => {
     try {
@@ -131,7 +128,20 @@ app.post('/api/profesionales/derivar', async (req, res) => {
         res.status(500).json({ status: 'error', message: 'No se pudo guardar la derivación.' });
     }
 });
-
+// Endpoint para mover turno a la agenda de Fuerzas de Seguridad
+app.post('/api/admin/mover-fuerzas', async (req, res) => {
+    try {
+        const { idTurno, city } = req.body;
+        const response = await axios.post(APPS_SCRIPT_URL, {
+            action: 'moveToFuerzas',
+            idTurno: idTurno,
+            city: city
+        });
+        res.json(response.data);
+    } catch (error) {
+        res.status(500).json({ status: 'error', message: 'Error al mover el turno.' });
+    }
+});
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Servidor de la turnera corriendo en http://localhost:${PORT}`);
