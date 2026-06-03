@@ -8,7 +8,7 @@ app.use(express.static('public'));
 
 const APPS_SCRIPT_URL = process.env.APPS_SCRIPT_URL;
 
-// Obtener turnos disponibles
+
 // Obtener turnos disponibles
 app.get('/api/turnos', async (req, res) => {
     try {
