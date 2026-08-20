@@ -2,7 +2,10 @@ const express = require("express");
 const axios = require("axios");
 require("dotenv").config();
 const { createClient } = require("@supabase/supabase-js");
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_KEY,
+);
 
 const app = express();
 app.use(express.json());
@@ -206,10 +209,12 @@ async function calcularSlotsDisponibles(id_sede_dp, diasAdelante = 60) {
     for (const bloque of bloques) {
       const [hI, mI] = bloque.hora_inicio.split(":").map(Number);
       const [hF, mF] = bloque.hora_fin.split(":").map(Number);
-      let cursor = new Date(fecha);
-      cursor.setHours(hI, mI, 0, 0);
-      const fin = new Date(fecha);
-      fin.setHours(hF, mF, 0, 0);
+      let cursor = new Date(
+        `${fechaStr}T${String(hI).padStart(2, "0")}:${String(mI).padStart(2, "0")}:00-03:00`,
+      );
+      const fin = new Date(
+        `${fechaStr}T${String(hF).padStart(2, "0")}:${String(mF).padStart(2, "0")}:00-03:00`,
+      );
 
       while (cursor < fin) {
         if (cursor > new Date()) {
