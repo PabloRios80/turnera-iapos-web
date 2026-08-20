@@ -182,9 +182,38 @@
 
       <div class="city-buttons">
         <a href="agenda-santafe.html" class="btn-city">Ciudad de Santa Fe</a>
-        <a href="agenda-rosario.html" class="btn-city btn-rosario"
-          >Ciudad de Rosario</a
+
+        <button
+          type="button"
+          class="btn-city"
+          id="btn-rosario-toggle"
+          style="
+            background-color: #059669;
+            border: none;
+            width: 100%;
+            cursor: pointer;
+          "
         >
+          Ciudad de Rosario
+        </button>
+        <div
+          id="rosario-opciones"
+          style="display: none; flex-direction: column; gap: 10px"
+        >
+          <a
+            href="agenda-rosario.html"
+            class="btn-city"
+            style="background-color: #047857"
+            >Hospital Italiano</a
+          >
+          <a
+            href="agenda.html?sede=4"
+            class="btn-city"
+            style="background-color: #c2410c"
+            >Grupo Delta</a
+          >
+        </div>
+
         <a
           href="agenda.html?sede=6"
           class="btn-city"
@@ -192,6 +221,16 @@
           >Ciudad de Coronda</a
         >
       </div>
+
+      <script>
+        document
+          .getElementById("btn-rosario-toggle")
+          .addEventListener("click", function () {
+            const opciones = document.getElementById("rosario-opciones");
+            const abierto = opciones.style.display === "flex";
+            opciones.style.display = abierto ? "none" : "flex";
+          });
+      </script>
     </div>
   </body>
 </html>
