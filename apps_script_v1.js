@@ -65,6 +65,7 @@ function doPost(e) {
       case 'cancelAppointment': result = cancelAppointment(params.eventId); break;
       case 'getAllAppointments': result = getAllAppointments(); break;
       case 'getUserDataByDNI': result = getUserDataByDNI(params.dni); break;
+      case 'sendConfirmationEmailSede': result = sendConfirmationEmailSede(params.datos); break;
       default: result = { status: 'error', message: 'Acción no reconocida' };
     }
   } catch (err) {
@@ -121,9 +122,38 @@ function bookAppointment(slotId, userInfo) {
   return { status: 'error', message: 'El turno ya no está disponible.' };
 }
 
+// =================================================================
+// ENVÍO DE MAIL PARA EL SISTEMA NUEVO (Supabase, multi-sede)
+// El turno en sí ya se guardó en Supabase antes de llamar acá — esta
+// función solo manda el mail de confirmación, reutilizando la misma
+// cuenta de Gmail que ya usa el sistema viejo.
+// =================================================================
+function sendConfirmationEmailSede(datos) {
+  try {
+    if (!datos || !datos.email) {
+      return { status: 'error', message: 'Falta el email del destinatario.' };
+    }
+    const fechaInicio = new Date(datos.fechaInicioISO);
+    const turnoFecha = fechaInicio.toLocaleString('es-AR', { dateStyle: 'full', timeStyle: 'short' });
+    const asunto = "Confirmación e Instrucciones para tu turno - Día Preventivo IAPOS";
+    const direccion = datos.direccionSede || 'Consultá la dirección con tu sede.';
+    const instrucciones = datos.instruccionesSede
+      ? `\n${datos.instruccionesSede}\n`
+      : `\n- Es muy importante que venga en AYUNO de al menos 12hs.\n- Si es FUMADOR/A, NO debe fumar al menos una hora previa al turno.\n- Si utiliza lentes, debe TRAERLOS ese día.\n`;
+    const contactoWhatsapp = datos.whatsappSede || '';
+
+    const cuerpo = `Hola ${datos.nombre},\n\nTu turno para el Día Preventivo de IAPOS ha sido confirmado:\n\nFecha y Hora: ${turnoFecha}\n\n----------------------------------------------------\nINSTRUCCIONES IMPORTANTES PARA TU TURNO:\n----------------------------------------------------${instrucciones}\n- Dirección: ${direccion}${contactoWhatsapp ? `\n- WhatsApp de Contacto: ${contactoWhatsapp}` : ''}\n----------------------------------------------------\n\n${datos.urlCancelacion ? `Si necesitas cancelar, usa este enlace:\n${datos.urlCancelacion}\n\n` : ''}¡Te esperamos!`;
+
+    GmailApp.sendEmail(datos.email, asunto, cuerpo, { name: 'IAPOS Día Preventivo' });
+    return { status: 'success', message: 'Mail enviado.' };
+  } catch (err) {
+    return { status: 'error', message: 'Error al enviar el mail: ' + err.toString() };
+  }
+}
+
+
 function getAllAppointments() {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
-  if (sheet.getLastRow() < 2) return { status: 'success', appointments: [] };
   const data = sheet.getRange(2, 1, sheet.getLastRow() - 1, 10).getValues();
   const appointments = [];
   for (let row of data) {

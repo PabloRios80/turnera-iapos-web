@@ -301,6 +301,33 @@ app.post("/api/turnos-sede/reservar", async (req, res) => {
     });
     if (error) throw error;
 
+    // Enviar mail de confirmación con los datos reales de esta sede — si
+    // falla, no rompe la reserva (ya quedó guardada bien en Supabase),
+    // solo se registra el error en el log.
+    if (email) {
+      try {
+        const { data: sedeInfo } = await supabase
+          .from("sedes_dp")
+          .select("direccion, telefono, instrucciones")
+          .eq("id", id_sede_dp)
+          .single();
+
+        await axios.post(APPS_SCRIPT_URL, {
+          action: "sendConfirmationEmailSede",
+          datos: {
+            email,
+            nombre,
+            fechaInicioISO: fechaInicio.toISOString(),
+            direccionSede: sedeInfo?.direccion || "",
+            instruccionesSede: sedeInfo?.instrucciones || "",
+            whatsappSede: sedeInfo?.telefono || "",
+          },
+        });
+      } catch (errorMail) {
+        console.error("No se pudo enviar el mail de confirmación:", errorMail.message);
+      }
+    }
+
     res.json({ status: "success", message: "Turno confirmado con éxito." });
   } catch (e) {
     res
