@@ -320,6 +320,27 @@ app.post("/api/turnos-sede/reservar", async (req, res) => {
     return res.status(400).json({ status: "error", message: "Faltan datos." });
   }
   try {
+    // Evitar que la misma persona reserve varios turnos a la vez (o
+    // encadene varios "por error" al hacer varios clicks) — si ya tiene
+    // un turno confirmado a futuro en cualquier sede, no se le permite
+    // sacar otro hasta que use o cancele el que ya tiene.
+    const ahoraISO = new Date().toISOString();
+    const { data: turnoExistente } = await supabase
+      .from("turnos")
+      .select("id, fecha_inicio, id_sede_dp")
+      .eq("dni", dni)
+      .eq("estado", "Confirmado")
+      .gte("fecha_inicio", ahoraISO)
+      .limit(1)
+      .maybeSingle();
+
+    if (turnoExistente) {
+      return res.json({
+        status: "error",
+        message: `Ya tenés un turno reservado para el ${new Date(turnoExistente.fecha_inicio).toLocaleString("es-AR", { dateStyle: "long", timeStyle: "short" })}. Si necesitás cambiarlo, cancelá primero el que ya tenés.`,
+      });
+    }
+
     // Revalidar que el slot siga libre justo antes de reservar
     const slotsActuales = await calcularSlotsDisponibles(id_sede_dp);
     const sigueLibre = slotsActuales.some((s) => s.id === slotId);
