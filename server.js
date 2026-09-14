@@ -61,8 +61,48 @@ app.post("/api/reservar", async (req, res) => {
 
 app.get("/api/admin/turnos", async (req, res) => {
   try {
+    const { city, desde, hasta } = req.query;
+    const idSedeNumerico = parseInt(city);
+
+    // Sedes nuevas (Delta, Coronda, etc.) — el turno vive en Supabase,
+    // no en la hoja de Google del sistema viejo.
+    if (!isNaN(idSedeNumerico)) {
+      const hoy = new Date();
+      const desdeFecha = desde
+        ? new Date(desde)
+        : new Date(hoy.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const hastaFecha = hasta
+        ? new Date(hasta)
+        : new Date(hoy.getTime() + 62 * 24 * 60 * 60 * 1000);
+
+      const { data, error } = await supabase
+        .from("turnos")
+        .select("*")
+        .eq("id_sede_dp", idSedeNumerico)
+        .eq("estado", "Confirmado")
+        .gte("fecha_inicio", desdeFecha.toISOString())
+        .lte("fecha_inicio", hastaFecha.toISOString())
+        .order("fecha_inicio", { ascending: true });
+      if (error) throw error;
+
+      const appointments = (data || []).map((t) => ({
+        idTurno: t.id_turno,
+        fechaInicio: t.fecha_inicio,
+        apellido: t.apellido,
+        nombre: t.nombre,
+        dni: t.dni,
+        email: t.email,
+        telefono: t.telefono,
+        idEvento: null, // no hay evento de Calendar en el sistema nuevo
+      }));
+      return res.json({ status: "success", appointments });
+    }
+
+    // Ciudades viejas (santafe, rosario, fuerzas) — siguen en Google Sheets
     const response = await axios.post(APPS_SCRIPT_URL, {
       action: "getAllAppointments",
+      desde,
+      hasta,
     });
     res.json(response.data);
   } catch (error) {
@@ -71,6 +111,21 @@ app.get("/api/admin/turnos", async (req, res) => {
       status: "error",
       message: "No se pudieron cargar los turnos agendados.",
     });
+  }
+});
+
+// Lista de sedes del sistema nuevo, para poblar el selector del admin
+// (además de las 3 ciudades viejas, que quedan fijas en el frontend).
+app.get("/api/sedes-turnera", async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from("sedes_dp")
+      .select("id, nombre, ciudad")
+      .order("id", { ascending: true });
+    if (error) throw error;
+    res.json({ status: "success", sedes: data || [] });
+  } catch (e) {
+    res.status(500).json({ status: "error", message: e.message });
   }
 });
 

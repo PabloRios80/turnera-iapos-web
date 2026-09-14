@@ -66,6 +66,16 @@
 
             <div id="vista-turnos" class="vista activa">
                 <h3>Turnos en <span class="ciudad-actual-label">Santa Fe</span></h3>
+                <div style="background:#f8f9fa; border:1px solid #dee2e6; border-radius:6px; padding:10px 14px; margin-bottom:12px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                    <span style="font-size:0.85em; color:#6c757d;">Por defecto se muestra la última semana hasta 2 meses adelante.</span>
+                    <button id="btn-ver-historial" type="button" class="action-button btn-gray" style="padding:5px 10px; font-size:0.85em;">Ver historial anterior</button>
+                    <span id="historial-filtros" style="display:none; align-items:center; gap:8px;">
+                        <label style="font-size:0.85em;">Desde: <input type="date" id="historial-desde"></label>
+                        <label style="font-size:0.85em;">Hasta: <input type="date" id="historial-hasta"></label>
+                        <button id="btn-aplicar-historial" type="button" class="action-button btn-green" style="padding:5px 10px; font-size:0.85em;">Aplicar</button>
+                        <button id="btn-cerrar-historial" type="button" class="action-button btn-gray" style="padding:5px 10px; font-size:0.85em;">Volver a lo reciente</button>
+                    </span>
+                </div>
                 <table id="turnos-table">
                     <thead><tr><th>Fecha y Hora</th><th>Apellido y Nombre</th><th>DNI</th><th>Email</th><th>Teléfono</th><th>Acciones</th></tr></thead>
                     <tbody></tbody>
@@ -132,6 +142,33 @@
             };
 
             // 3. CAMBIO DE CIUDAD
+            let sedesNuevasPorId = {}; // id_sede_dp -> nombre, para las etiquetas
+
+            async function cargarSedesNuevas() {
+                try {
+                    const res = await fetch('/api/sedes-turnera');
+                    const data = await res.json();
+                    if (data.status !== 'success') return;
+                    // Santa Fe (id 1) y Rosario (id 3) ya están cubiertas por
+                    // las opciones viejas (santafe/rosario) — no duplicar.
+                    (data.sedes || [])
+                        .filter((s) => s.id !== 1 && s.id !== 3)
+                        .forEach((s) => {
+                            sedesNuevasPorId[s.id] = `${s.nombre} (${s.ciudad})`;
+                            const opt = document.createElement('option');
+                            opt.value = String(s.id);
+                            opt.textContent = `${s.nombre} (${s.ciudad})`;
+                            citySelect.appendChild(opt);
+                        });
+                    // Si la ciudad guardada era una sede nueva, hay que
+                    // re-aplicar la etiqueta ahora que ya se cargó su nombre.
+                    actualizarLabelsCiudad(citySelect.value);
+                } catch (e) {
+                    console.error('No se pudieron cargar las sedes nuevas:', e.message);
+                }
+            }
+            cargarSedesNuevas();
+
             const ciudadGuardada = localStorage.getItem('admin-ciudad-preferida') || 'santafe';
             citySelect.value = ciudadGuardada;
             actualizarLabelsCiudad(ciudadGuardada);
@@ -147,8 +184,40 @@
                 let nombreCiudad = 'Santa Fe';
                 if(ciudad === 'rosario') nombreCiudad = 'Rosario';
                 if(ciudad === 'fuerzas') nombreCiudad = 'Fuerzas de Seguridad';
+                if(sedesNuevasPorId[ciudad]) nombreCiudad = sedesNuevasPorId[ciudad];
                 ciudadLabels.forEach(span => span.textContent = nombreCiudad);
             }
+
+            // Filtro de historial — por defecto, cargarTurnosAgendados()
+            // trae solo la última semana hasta 2 meses adelante (lo
+            // resuelve el backend). Este filtro permite pedir un rango
+            // distinto para ver turnos más viejos.
+            const btnVerHistorial = document.getElementById('btn-ver-historial');
+            const historialFiltros = document.getElementById('historial-filtros');
+            const btnAplicarHistorial = document.getElementById('btn-aplicar-historial');
+            const btnCerrarHistorial = document.getElementById('btn-cerrar-historial');
+            let rangoHistorialActivo = null; // {desde, hasta} o null (= rango por defecto)
+
+            btnVerHistorial.addEventListener('click', () => {
+                historialFiltros.style.display = 'inline-flex';
+                btnVerHistorial.style.display = 'none';
+            });
+            btnCerrarHistorial.addEventListener('click', () => {
+                historialFiltros.style.display = 'none';
+                btnVerHistorial.style.display = 'inline-block';
+                rangoHistorialActivo = null;
+                cargarTurnosAgendados();
+            });
+            btnAplicarHistorial.addEventListener('click', () => {
+                const desde = document.getElementById('historial-desde').value;
+                const hasta = document.getElementById('historial-hasta').value;
+                if (!desde || !hasta) {
+                    alert('Elegí ambas fechas (desde y hasta).');
+                    return;
+                }
+                rangoHistorialActivo = { desde, hasta };
+                cargarTurnosAgendados();
+            });
 
             function recargarDatos() {
                 cargarTurnosAgendados();
@@ -178,7 +247,11 @@
                 turnosTableBody.innerHTML = '<tr><td colspan="6">Cargando...</td></tr>';
                 const ciudad = citySelect.value;
                 try {
-                    const response = await fetch(`/api/admin/turnos?city=${ciudad}`);
+                    let url = `/api/admin/turnos?city=${ciudad}`;
+                    if (rangoHistorialActivo) {
+                        url += `&desde=${rangoHistorialActivo.desde}&hasta=${rangoHistorialActivo.hasta}`;
+                    }
+                    const response = await fetch(url);
                     const data = await response.json();
                     
                     if (data.status === 'success' && data.appointments.length > 0) {
